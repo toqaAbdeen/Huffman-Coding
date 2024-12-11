@@ -4,7 +4,24 @@ import java.io.*;
 
 public class FileDecompressor {
 
-	// Decompress the file using the Huffman tree (BinaryTree)
+	/**
+	 * The decompress method takes a compressed file and a special set of rules
+	 * (Huffman tree). It follows these rules to decode the compressed file and save
+	 * the original file.
+	 * 
+	 * First, it converts the compressed file into a long string of 0s and 1s. Then,
+	 * it starts at the beginning of this string and follows the rules in the
+	 * Huffman tree.
+	 * 
+	 * Each 0 or 1 tells the method to go left or right in the tree. When it reaches
+	 * the end of a branch (a leaf), it finds a letter and writes it to the new
+	 * file. Then, it starts again from the beginning of the string and the tree.
+	 * 
+	 * 
+	 * This process continues until the entire string of 0 s and 1s is used, and the
+	 * original file is fully restored.
+	 **/
+
 	public static void decompress(byte[] compressedData, BinaryTree huffmanTree, String outputFile) throws IOException {
 		try (FileOutputStream fos = new FileOutputStream(outputFile)) {
 			StringBuilder binaryString = new StringBuilder();
@@ -34,45 +51,4 @@ public class FileDecompressor {
 		}
 	}
 
-	// Build the Huffman tree from a frequency table
-	public static Node buildHuffmanTree(int[] frequencyTable) {
-		Heap heap = new Heap(frequencyTable.length);
-
-		// Insert all nodes with non-zero frequency into the heap
-		for (int i = 0; i < frequencyTable.length; i++) {
-			if (frequencyTable[i] > 0) {
-				heap.addElement(new Node(frequencyTable[i], (char) i));
-			}
-		}
-
-		// Combine the two smallest nodes until only one node is left in the heap
-		while (heap.getSize() > 1) {
-			Node left = heap.deleteElement();
-			Node right = heap.deleteElement();
-			Node internalNode = new Node(left.getFreq() + right.getFreq(), '\0');
-			internalNode.setLeft(left);
-			internalNode.setRight(right);
-			heap.addElement(internalNode);
-		}
-
-		return heap.deleteElement();
-	}
-
-	// Convert a Node-based tree to a BinaryTree structure
-	private static BinaryTree convertToBinaryTree(Node root) {
-		if (root == null)
-			return null;
-
-		BinaryTree tree = new BinaryTree(root.getCh(), "", root.getFreq());
-		tree.left = convertToBinaryTree(root.getLeft());
-		tree.right = convertToBinaryTree(root.getRight());
-		return tree;
-	}
-
-	// Read the Huffman tree from the header file
-	public static BinaryTree readHuffmanTree(String headerFile) throws IOException, ClassNotFoundException {
-		try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(headerFile))) {
-			return (BinaryTree) ois.readObject(); // Deserialize and return the Huffman tree
-		}
-	}
 }
